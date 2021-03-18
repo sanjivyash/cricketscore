@@ -43,21 +43,21 @@ void main(void) {
 			case '2': runs ++;
 			case '1': runs ++;
 			case '.': balls ++;
-								break;
+			          break;
 			
 			case 'e': 
 			case 'n': runs ++;
-								ch -= 32;
-								break;
+			          ch -= 32;
+			          break;
 			
 			case 'w': wickets ++;
-								balls ++;
-								ch -= 32;
-								break;
+			          balls ++;
+			          ch -= 32;
+			          break;
 			
 			default: transmit_char(ch);
-							 transmit_string(" - Invalid character sent\r\n");
-							 continue;
+			         transmit_string(" - Invalid character sent\r\n");
+			         continue;
 		}
 		
 		update(ch);
