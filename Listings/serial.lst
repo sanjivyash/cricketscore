@@ -1,0 +1,97 @@
+C51 COMPILER V9.60.0.0   SERIAL                                                            03/18/2021 20:25:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SERIAL
+OBJECT MODULE PLACED IN .\Objects\serial.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE utils\serial\serial.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\serial.lst) TABS(2) OBJECT(.\Objects\serial.obj)
+
+line level    source
+
+   1          #include "at89c5131.h"
+   2          #include "serial.h"
+   3          
+   4          // global variables
+   5          bit tx_complete = 0;
+   6          bit rx_complete = 0;
+   7          
+   8          void uart_init(void) {
+   9   1      /**********************************************
+  10   1        DESC: initial configuration of serial ports
+  11   1      ***********************************************/  
+  12   1        TMOD = 0x20;
+  13   1        TH1 = 0xCC;       // baud rate = 1200
+  14   1        SCON = 0x53;
+  15   1        TR1 = 1;
+  16   1        ES = 1;
+  17   1        EA = 1;
+  18   1      }
+  19            
+  20          void transmit_char(unsigned char ch) {
+  21   1      /************************************************
+  22   1        DESC: transmit a character to the serial port
+  23   1        ARGS:
+  24   1          ch: character to be transmitted
+  25   1      ************************************************/
+  26   1        SBUF=ch;
+  27   1        while(!tx_complete);
+  28   1        tx_complete = 0;
+  29   1      }
+  30            
+  31          void transmit_string(unsigned char *s) {
+  32   1      /***************************************************
+  33   1        DESC: transmit a string to the serial port
+  34   1        ARGS:
+  35   1          s: reference to the start of the string array
+  36   1      ***************************************************/
+  37   1        while(*s != 0)
+  38   1          transmit_char(*s++);
+  39   1      }
+  40            
+  41          unsigned char receive_char(void) {
+  42   1      /*******************************************************
+  43   1        DESC: receive a character transmitted by serial port
+  44   1        RETURN:
+  45   1          ch: character received from the serial port
+  46   1      *******************************************************/  
+  47   1        unsigned char ch = 0;
+  48   1        while(!rx_complete);        //Wait for rx_complete(interrupt to complete)
+  49   1        rx_complete = 0;
+  50   1        ch = SBUF;          //Read data from SBUF
+  51   1        return ch;          //Return read character
+  52   1      }
+  53          
+  54          void serial_ISR(void) interrupt 4 {
+C51 COMPILER V9.60.0.0   SERIAL                                                            03/18/2021 20:25:04 PAGE 2   
+
+  55   1      /**********************************************************
+  56   1         Serial_ISR(): 
+  57   1        Interrupt service routine for UART interrupt.
+  58   1        Determines whether it is a transmit or receive
+  59   1        interrupt and raise corresponding flag.
+  60   1        Transmit or receive functions (defined above) monitor
+  61   1        for these flags to check if data transfer is done.
+  62   1      ***********************************************************/  
+  63   1        if(TI == 1) {
+  64   2          TI = 0;
+  65   2          tx_complete = 1;
+  66   2        } 
+  67   1        else if(RI == 1) {
+  68   2          RI = 0;
+  69   2          rx_complete = 1;
+  70   2        }
+  71   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     87    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

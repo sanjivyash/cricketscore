@@ -1,0 +1,103 @@
+C51 COMPILER V9.60.0.0   LCD                                                               03/18/2021 20:25:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN .\Objects\lcd.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE utils\lcd\lcd.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\List
+                    -ings\lcd.lst) TABS(2) OBJECT(.\Objects\lcd.obj)
+
+line level    source
+
+   1          #include "at89c5131.h"
+   2          #include "lcd.h"
+   3          
+   4          // global variables
+   5          sbit RS=P0^0;
+   6          sbit RW=P0^1;
+   7          sbit EN=P0^2;
+   8          
+   9          void msdelay(unsigned int time) {
+  10   1      /******************************************
+  11   1        DESC: simulate delays using software
+  12   1        ARGS:
+  13   1          time: number of milliseconds of delay
+  14   1      ******************************************/
+  15   1        unsigned int i, j;
+  16   1        
+  17   1        for(i=0; i<time; i++)
+  18   1          for(j=0; j<355; j++);
+  19   1      }
+  20          
+  21          void lcd_init(void) {
+  22   1      /****************************************
+  23   1        DESC: initial configuration of the lcd
+  24   1      ****************************************/
+  25   1        P2=0x00;
+  26   1        EN=0;
+  27   1        RS=0;
+  28   1        RW=0;
+  29   1        
+  30   1        lcd_cmd(0x38);
+  31   1        msdelay(4);
+  32   1        lcd_cmd(0x06);
+  33   1        msdelay(4);
+  34   1        lcd_cmd(0x0C);
+  35   1        msdelay(4);
+  36   1        lcd_cmd(0x01);
+  37   1        msdelay(4);
+  38   1        lcd_cmd(0x80);
+  39   1      }
+  40          
+  41          void lcd_cmd(unsigned int i) {
+  42   1      /*******************************
+  43   1        DESC: command mode of LCD
+  44   1        ARGS:
+  45   1          i: command code to execute
+  46   1      *******************************/
+  47   1        RS=0;
+  48   1        RW=0;
+  49   1        EN=1;
+  50   1        P2=i;
+  51   1        msdelay(10);
+  52   1        EN=0;
+  53   1      }
+  54          
+C51 COMPILER V9.60.0.0   LCD                                                               03/18/2021 20:25:04 PAGE 2   
+
+  55          void lcd_char(unsigned char ch) {
+  56   1      /**********************************
+  57   1        DESC: character mode of LCD
+  58   1        ARGS:
+  59   1          ch: character to be displayed 
+  60   1      **********************************/
+  61   1        RS = 1;
+  62   1        RW = 0;
+  63   1        EN = 1;
+  64   1        P2 = ch;
+  65   1        msdelay(10);
+  66   1        EN = 0;
+  67   1      }
+  68          
+  69          void lcd_string(unsigned char *s) {
+  70   1      /**************************************************
+  71   1        DESC: display strings on LCD
+  72   1        ARGS:
+  73   1          s: reference to the start of the string array
+  74   1      **************************************************/
+  75   1        while(*s != 0)
+  76   1          lcd_char(*s++);
+  77   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    156    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
