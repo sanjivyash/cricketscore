@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   MAIN                                                              03/18/2021 20:25:04 PAGE 1   
+C51 COMPILER V9.60.0.0   MAIN                                                              03/19/2021 18:04:26 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
@@ -15,126 +15,125 @@ line level    source
    5          #include "utils/lcd/lcd.h"
    6          #include "utils/serial/serial.h"
    7          
-   8          unsigned int runs, wickets, overs, balls;
-   9          unsigned char status[17];
-  10          bit new_over = 0;
-  11          
-  12          void main(void) {
-  13   1        unsigned char score[16];
-  14   1        unsigned char ch;
-  15   1        
-  16   1        lcd_init();
-  17   1        uart_init();
-  18   1        init();
-  19   1        
-  20   1        // throw away erroneous first character
-  21   1        receive_char();
-  22   1        
-  23   1        while(1) {
-  24   2          sprintf(score, "%d/%d (%d.%d)", runs, wickets, overs, balls);
-  25   2          
-  26   2          lcd_cmd(0x80);
-  27   2          lcd_string(score);
-  28   2          lcd_cmd(0x0C0);
-  29   2          lcd_string(status);
-  30   2          
-  31   2          if(overs == 20 || wickets == 10){
-  32   3            reset();
-  33   3            continue;
-  34   3          }
-  35   2          
-  36   2          ch = receive_char();
-  37   2          
-  38   2          switch(ch) {
-  39   3            case '6': runs ++;
-  40   3            case '5': runs ++;
-  41   3            case '4': runs ++;
-  42   3            case '3': runs ++;
-  43   3            case '2': runs ++;
-  44   3            case '1': runs ++;
-  45   3            case '.': balls ++;
-  46   3                      break;
-  47   3            
-  48   3            case 'e': 
-  49   3            case 'n': runs ++;
-  50   3                      ch -= 32;
-  51   3                      break;
-  52   3            
-  53   3            case 'w': wickets ++;
-  54   3                      balls ++;
-C51 COMPILER V9.60.0.0   MAIN                                                              03/18/2021 20:25:04 PAGE 2   
+   8          unsigned int runs, wickets, overs, balls, pos;
+   9          bit new_over = 0;
+  10          
+  11          void main(void) {
+  12   1        unsigned char score[16];
+  13   1        unsigned char ch;
+  14   1        
+  15   1        lcd_init();
+  16   1        uart_init();
+  17   1        init();
+  18   1        
+  19   1        // throw away erroneous first character
+  20   1        receive_char();
+  21   1        
+  22   1        while(1) {
+  23   2          sprintf(score, "%d/%d (%d.%d)", runs, wickets, overs, balls);
+  24   2          
+  25   2          lcd_cmd(0x80);
+  26   2          lcd_string(score);
+  27   2          
+  28   2          if(overs == 20 || wickets == 10){
+  29   3            reset();
+  30   3            continue;
+  31   3          }
+  32   2          
+  33   2          ch = receive_char();
+  34   2          
+  35   2          switch(ch) {
+  36   3            case '6': runs ++;
+  37   3            case '5': runs ++;
+  38   3            case '4': runs ++;
+  39   3            case '3': runs ++;
+  40   3            case '2': runs ++;
+  41   3            case '1': runs ++;
+  42   3            case '.': balls ++;
+  43   3                      break;
+  44   3            
+  45   3            case 'e': 
+  46   3            case 'n': runs ++;
+  47   3                      ch -= 32;
+  48   3                      break;
+  49   3            
+  50   3            case 'w': wickets ++;
+  51   3                      balls ++;
+  52   3                      ch -= 32;
+  53   3                      break;
+  54   3            
+C51 COMPILER V9.60.0.0   MAIN                                                              03/19/2021 18:04:26 PAGE 2   
 
-  55   3                      ch -= 32;
-  56   3                      break;
-  57   3            
-  58   3            default: transmit_char(ch);
-  59   3                     transmit_string(" - Invalid character sent\r\n");
-  60   3                     continue;
-  61   3          }
-  62   2          
-  63   2          update(ch);
-  64   2        }
-  65   1      }
-  66          
-  67          void init() {
-  68   1      /*******************************************************
-  69   1        DESC: initialization of global variables and messages
-  70   1      *******************************************************/
-  71   1        // initial messages
-  72   1        transmit_string("*******************************\r\n");
-  73   1        transmit_string("********Cricketscore***********\r\n");
-  74   1        transmit_string("*******************************\r\n");
-  75   1        transmit_string("Press a character to start game\r\n");
-  76   1        
-  77   1        // global vars
-  78   1        runs = 0;
-  79   1        wickets = 0, overs = 0, balls = 0;
-  80   1        status[0] = 0;
-  81   1      }
-  82          
-  83          void update(unsigned char ch) {
-  84   1      /***********************************************************
-  85   1        DESC: updation of global variables after a ball is bowled
-  86   1        ARGS:
-  87   1          ch: character received from keyboard
-  88   1      ***********************************************************/
-  89   1        if(new_over == 1) {
-  90   2          status[0] = 0;
-  91   2          lcd_cmd(0x01);
-  92   2          msdelay(100);
-  93   2          new_over = 0;
-  94   2        }
-  95   1        
-  96   1        if(balls == 6) {
-  97   2          balls = 0;
-  98   2          overs ++;
-  99   2          new_over = 1;
- 100   2        }
- 101   1        
- 102   1        strncat(status, &ch, 1);
- 103   1      }
- 104          
- 105          void reset() {
- 106   1      /*************************************************
- 107   1        DESC: denote end of innings and reset variables
- 108   1      *************************************************/
- 109   1        lcd_cmd(0x0C0);
- 110   1        lcd_string("Innings Ends");
- 111   1        msdelay(5000);
- 112   1        lcd_cmd(0x01);
- 113   1        msdelay(100);
- 114   1        init();
- 115   1      }
+  55   3            default: transmit_char(ch);
+  56   3                     transmit_string(" - Invalid character sent\r\n");
+  57   3                     continue;
+  58   3          }
+  59   2          
+  60   2          update(ch);
+  61   2        }
+  62   1      }
+  63          
+  64          void init() {
+  65   1      /*******************************************************
+  66   1        DESC: initialization of global variables and messages
+  67   1      *******************************************************/
+  68   1        // initial messages
+  69   1        transmit_string("*******************************\r\n");
+  70   1        transmit_string("********Cricketscore***********\r\n");
+  71   1        transmit_string("*******************************\r\n");
+  72   1        transmit_string("Press a character to start game\r\n");
+  73   1        
+  74   1        // global vars
+  75   1        runs = 0;
+  76   1        wickets = 0, overs = 0, balls = 0;
+  77   1        pos = 0x0CF;         // second row, last column
+  78   1      }
+  79          
+  80          void update(unsigned char ch) {
+  81   1      /***********************************************************
+  82   1        DESC: updation of global variables after a ball is bowled
+  83   1        ARGS:
+  84   1          ch: character received from keyboard
+  85   1      ***********************************************************/
+  86   1        if(new_over == 1) {
+  87   2          lcd_cmd(0x01);
+  88   2          msdelay(100);
+  89   2          new_over = 0;
+  90   2          pos = 0x0CF;
+  91   2        }
+  92   1        
+  93   1        if(balls == 6) {
+  94   2          balls = 0;
+  95   2          overs ++;
+  96   2          new_over = 1;
+  97   2        }
+  98   1        
+  99   1        lcd_cmd(pos);
+ 100   1        lcd_char(ch);
+ 101   1        pos -= 1;
+ 102   1      }
+ 103          
+ 104          void reset() {
+ 105   1      /*************************************************
+ 106   1        DESC: denote end of innings and reset variables
+ 107   1      *************************************************/
+ 108   1        lcd_cmd(0x0C0);
+ 109   1        lcd_string("Innings Ends    ");
+ 110   1        msdelay(5000);
+ 111   1        lcd_cmd(0x01);
+ 112   1        msdelay(100);
+ 113   1        init();
+ 114   1      }
 
-C51 COMPILER V9.60.0.0   MAIN                                                              03/18/2021 20:25:04 PAGE 3   
 
+C51 COMPILER V9.60.0.0   MAIN                                                              03/19/2021 18:04:26 PAGE 3   
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    433    ----
-   CONSTANT SIZE    =    157    ----
+   CODE SIZE        =    421    ----
+   CONSTANT SIZE    =    161    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     25      18
+   DATA SIZE        =     10      18
    IDATA SIZE       =   ----    ----
    BIT SIZE         =      1    ----
 END OF MODULE INFORMATION.

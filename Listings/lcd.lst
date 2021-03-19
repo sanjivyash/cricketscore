@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   LCD                                                               03/18/2021 20:25:04 PAGE 1   
+C51 COMPILER V9.60.0.0   LCD                                                               03/19/2021 18:04:27 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD
@@ -62,7 +62,7 @@ line level    source
   52   1        EN=0;
   53   1      }
   54          
-C51 COMPILER V9.60.0.0   LCD                                                               03/18/2021 20:25:04 PAGE 2   
+C51 COMPILER V9.60.0.0   LCD                                                               03/19/2021 18:04:27 PAGE 2   
 
   55          void lcd_char(unsigned char ch) {
   56   1      /**********************************

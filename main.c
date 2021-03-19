@@ -5,8 +5,7 @@
 #include "utils/lcd/lcd.h"
 #include "utils/serial/serial.h"
 
-unsigned int runs, wickets, overs, balls;
-unsigned char status[17];
+unsigned int runs, wickets, overs, balls, pos;
 bit new_over = 0;
 
 void main(void) {
@@ -25,8 +24,6 @@ void main(void) {
 		
 		lcd_cmd(0x80);
 		lcd_string(score);
-		lcd_cmd(0x0C0);
-		lcd_string(status);
 		
 		if(overs == 20 || wickets == 10){
 			reset();
@@ -77,7 +74,7 @@ void init() {
 	// global vars
 	runs = 0;
 	wickets = 0, overs = 0, balls = 0;
-	status[0] = 0;
+	pos = 0x0CF;         // second row, last column
 }
 
 void update(unsigned char ch) {
@@ -87,10 +84,10 @@ void update(unsigned char ch) {
 		ch: character received from keyboard
 ***********************************************************/
 	if(new_over == 1) {
-		status[0] = 0;
 		lcd_cmd(0x01);
 		msdelay(100);
 		new_over = 0;
+		pos = 0x0CF;
 	}
 	
 	if(balls == 6) {
@@ -99,7 +96,9 @@ void update(unsigned char ch) {
 		new_over = 1;
 	}
 	
-	strncat(status, &ch, 1);
+	lcd_cmd(pos);
+	lcd_char(ch);
+	pos -= 1;
 }
 
 void reset() {
@@ -107,7 +106,7 @@ void reset() {
   DESC: denote end of innings and reset variables
 *************************************************/
 	lcd_cmd(0x0C0);
-	lcd_string("Innings Ends");
+	lcd_string("Innings Ends    ");
 	msdelay(5000);
 	lcd_cmd(0x01);
 	msdelay(100);
